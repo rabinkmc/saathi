@@ -8,3 +8,6 @@ class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     image = models.ImageField(upload_to="pics", null=True, blank=True )
+
+    def __str__(self):
+        return f"{self.author}->{self.title}"

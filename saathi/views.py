@@ -1,7 +1,4 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
 from rest_framework import serializers
-from rest_framework.response import Response
 from saathi.models import Post
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework import viewsets
@@ -29,10 +26,26 @@ class PostViewSet(viewsets.ModelViewSet):
 
     class PostListSerializer(serializers.ModelSerializer):
         author = serializers.StringRelatedField()
-        modified = serializers.DateTimeField(format="%A, %d,%B, %Y")
+        modified = serializers.DateTimeField(read_only=True,format="%A, %d,%B, %Y")
+
         class Meta:
             model = Post
-            fields = ["id","created", "modified", "author", "image", "title", "body"]
+            fields = ["id", "created", "modified", "author", "image", "title", "body"]
+
+        def update(self,instance, validated_data):
+           updated_instance =  instance.update(
+                **validated_data,
+                author=self.context['request'].user
+            )
+           return updated_instance
+          
+
+        def create(self, validated_data):
+            instance = Post.objects.create(
+                **validated_data,
+                author=self.context['request'].user
+            )
+            return instance
 
     serializer_class = PostListSerializer
     queryset = Post.objects.all()
